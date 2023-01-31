@@ -14,7 +14,7 @@ import os
 import sys
 from pathlib import Path
 from typing import List, Union, Tuple
-
+from time import sleep
 import clr
 from System import String
 
@@ -31,7 +31,7 @@ else:
     messagebox(severity='critical', title='FWS-Auto Dll', text='The dll is only available for 64bits systems')
 
 sys.path.append(path_dll)
-polydll = clr.AddReference('PolyDLL.dll')
+polydll = clr.AddReference('PolyDLL')
 
 from ISM_Device import ClassPoly  # ISM_Device is the assembly name within PolyDll, found this using dotPeek
 # application over the dll. ClasPoly is the .net object to use for communication and described in the documentation
@@ -137,21 +137,14 @@ class FWSAuto:
         return str(ret)
 
     def get_device_info(self) -> Tuple[str]:
-        model = String()
-        serial = String()
-        range = String()
-        ret = self._net_wrapper.GetInforData(model, serial, range)
+        ret, model, serial, range = self._net_wrapper.GetInforData(String(''), String(''), String(''))
         if ret != 0:
             raise PolyError(get_message_from_code(ret))
-        return str(model), str(serial), str(range)
+        return model, serial, range
 
     @property
     def wavelength(self) -> Tuple[float]:
-        sw = String()
-        lw = String()
-        cw = String()
-        fwhm = String()
-        ret = self._net_wrapper.GetCurrentWavelength(sw, cw, lw, fwhm)
+        ret, sw, cw, lw, fwhm = self._net_wrapper.GetCurrentWavelength(String(''), String(''), String(''), String(''))
         if ret != 0:
             raise PolyError(get_message_from_code(ret))
         return float(cw), float(fwhm)
@@ -161,8 +154,6 @@ class FWSAuto:
         cw = String(str(cw_fwhm[0]))
         fwhm = String(str(cw_fwhm[1]))
         ret = self._net_wrapper.SetWavelength(cw, fwhm)
-        if ret != 0:
-            raise PolyError(get_message_from_code(ret))
 
     def no_filtering(self) -> PolyMsg:
         ret = self._net_wrapper.GoBlankPosition()
@@ -176,13 +167,31 @@ class FWSAuto:
 if __name__ == '__main__':
     fws = FWSAuto()
     msg = fws.connect(r'C:\FWSPoly\20220818_FAPVIS00222.ism')
-    if msg.code != 0:
+    if not (msg.code == 0 and fws.is_device_enabled()):
         print(msg.message)
     else:
-        print(f'COM: {fws.get_com_port()}')
-        print(f'Infos: {fws.get_device_info()}')
-        print(f'Center wl, FWHM: {fws.wavelength}')
+        try:
+            print(f'COM: {fws.get_com_port()}')
+            print(f'Infos: {fws.get_device_info()}')
+            while True:
+                msg = fws.get_device_status()
+                print(msg.message)
+                if msg.code == 6:
+                    break
+                    sleep(1)
 
-        fws.disconnect()
+            fws.wavelength = (532, 10)
+            while True:
+                msg = fws.get_device_status()
+                print(msg.message)
+                if msg.code == 6:
+                    break
+                    sleep(1)
+
+            print(f'Center wl, FWHM: {fws.wavelength}')
+        except PolyError as pe:
+            print(str(pe))
+        finally:
+            fws.disconnect()
 
     
