@@ -2,12 +2,8 @@ from pymodaq.control_modules.move_utility_classes import DAQ_Move_base, comon_pa
 from pymodaq.daq_utils.daq_utils import ThreadCommand # object used to send info back to the main thread
 from pymodaq.daq_utils.parameter import Parameter
 
-class PythonWrapperOfYourInstrument:
-    #  TODO Replace this fake class with the import of the real python wrapper of your instrument
-    pass
 
-
-class DAQ_Move_Template(DAQ_Move_base):
+class DAQ_Move_FwsPoly(DAQ_Move_base):
     """Plugin for the Template Instrument
 
     This object inherits all functionality to communicate with PyMoDAQ Module through inheritance via DAQ_Move_base
