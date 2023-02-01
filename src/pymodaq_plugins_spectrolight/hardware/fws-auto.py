@@ -174,19 +174,20 @@ if __name__ == '__main__':
             print(f'COM: {fws.get_com_port()}')
             print(f'Infos: {fws.get_device_info()}')
             while True:
+                sleep(1)
                 msg = fws.get_device_status()
                 print(msg.message)
                 if msg.code == 6:
                     break
-                    sleep(1)
+
 
             fws.wavelength = (532, 10)
             while True:
+                sleep(1)
                 msg = fws.get_device_status()
                 print(msg.message)
                 if msg.code == 6:
                     break
-                    sleep(1)
 
             print(f'Center wl, FWHM: {fws.wavelength}')
         except PolyError as pe:
