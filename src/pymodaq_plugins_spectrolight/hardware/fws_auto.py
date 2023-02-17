@@ -44,8 +44,12 @@ class PolyError(Exception):
 class FWSAuto:
     def __init__(self):
         self._net_wrapper = ClassPoly()
+        self._cw: float = 532.
+        self._fwhm: int = 5
+        self._calib_path: str = None
 
     def connect(self, calibration_path: Union[str, Path]) -> str:
+        self._calib_path = str(calibration_path)
         ret = self._net_wrapper.PolyConnect(String(str(calibration_path)))
         return self._net_wrapper.GetStringMsg(ret)
 
@@ -72,16 +76,46 @@ class FWSAuto:
         return model, serial, range
 
     @property
-    def wavelength(self) -> Tuple[float]:
+    def cw_fwhm(self) -> Tuple[float]:
+        """Get/Set the wavelength and the full width at half maximum in nm.
+        cw_fwhm is set as a Tuple of floats with the central wavelength and the full width at half maximum in nm"""
         ret, sw, cw, lw, fwhm = self._net_wrapper.GetCurrentWavelength('', '', '', '')
         if ret != 0:
             raise PolyError(self._net_wrapper.GetStringMsg(ret))
-        return cw, fwhm
+        if ',' in cw:
+            cw = cw.replace(',', '.')
+            fwhm = fwhm.replace(',', '.')
+        self._cw, self._fwhm = float(cw), float(fwhm)
+        return self._cw, self._fwhm
 
-    @wavelength.setter
-    def wavelength(self, cw_fwhm: Tuple[float]):
+    @cw_fwhm.setter
+    def cw_fwhm(self, cw_fwhm: Tuple[float]):
         ret = self._net_wrapper.SetWavelength(cw_fwhm[0], cw_fwhm[1])
-        print(f'SetWavelength {self._net_wrapper.GetStringMsg(ret)}')
+        if ret == 0:
+            self._cw, self._fwhm = cw_fwhm[0], cw_fwhm[1]
+        else:
+            logger.error(f'SetWavelength: {self._net_wrapper.GetStringMsg(ret)}')
+
+    def set_cw_fwhm_from_internal(self):
+        self.cw_fwhm = self._cw, self._fwhm
+
+    @property
+    def cw(self) -> float:
+        self._cw, self._fwhm = self.cw_fwhm
+        return self._cw
+
+    @cw.setter
+    def cw(self, cw: float):
+        self.cw_fwhm = (cw, self._fwhm)
+
+    @property
+    def fwhm(self) -> float:
+        self._cw, self._fwhm = self.cw_fwhm
+        return self._fwhm
+
+    @fwhm.setter
+    def fwhm(self, fwhm: float):
+        self.cw_fwhm = (self._cw, fwhm)
 
     def no_filtering(self) -> str:
         ret = self._net_wrapper.GoBlankPosition()
@@ -103,10 +137,20 @@ if __name__ == '__main__':
         msg = fws.get_device_status()
         print(msg)
 
-        fws.wavelength = (530, 5)
+        fws.cw_fwhm = (530, 5)
         msg = fws.get_device_status()
         print(msg)
-        print(f'Center wl, FWHM: {fws.wavelength}')
+        print(f'Center wl, FWHM: {fws.cw_fwhm}')
+
+        fws.cw = 550
+        msg = fws.get_device_status()
+        print(msg)
+        print(f'Center wl: {fws.cw}')
+
+        fws.fwhm = 7
+        msg = fws.get_device_status()
+        print(msg)
+        print(f'FWHM: {fws.fwhm}')
 
     except PolyError as pe:
         print(str(pe))
