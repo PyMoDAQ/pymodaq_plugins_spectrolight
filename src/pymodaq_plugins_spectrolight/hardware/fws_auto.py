@@ -18,9 +18,9 @@ from time import sleep
 import clr
 from System import String, Double
 
-from pymodaq.daq_utils import daq_utils as utils
-from pymodaq.daq_utils.messenger import messagebox
-from pymodaq.daq_utils.enums import BaseEnum
+from pymodaq.utils import daq_utils as utils
+from pymodaq.utils.messenger import messagebox
+from pymodaq.utils.enums import BaseEnum
 
 logger = utils.set_logger(utils.get_module_name(__file__))
 
