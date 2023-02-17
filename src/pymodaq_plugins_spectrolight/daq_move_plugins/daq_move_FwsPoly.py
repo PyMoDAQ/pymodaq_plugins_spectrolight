@@ -19,18 +19,17 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
              hardware library
         """
         _controller_units = 'nm'  # here the units is a wavelength in nm
-        is_multiaxes = False
+        is_multiaxes = True
         _epsilon = 0.5
+        axes_name = ['cw', 'fwhm']
         params = [{'title': 'Calibration file:', 'name': 'calib_path', 'type': 'browsepath', 'value': calib_file_path,
                    'filetype': True},
                   {'title': 'Info:', 'name': 'info', 'type': 'str', 'value': '', 'readonly': True},
-                  {'title': 'Selected parameter:', 'name': 'select', 'type': 'list',
-                   'values': ['cw', 'fwhm']},
                   {'title': 'Status:', 'name': 'status', 'type': 'group', 'children': [
                       {'title': 'cw (nm):', 'name': 'cw', 'type': 'float', 'value': 0.},
                       {'title': 'fwhm (nm):', 'name': 'fwhm', 'type': 'int', 'value': 3, 'min': 3, 'max': 15},]},
                   {'title': 'Blank:', 'name': 'blank', 'type': 'led_push', 'value': False},
-                  ] + comon_parameters_fun(epsilon=_epsilon)
+                  ] + comon_parameters_fun(is_multiaxes=True, axes_names=axes_name, epsilon=_epsilon)
 
         def ini_attributes(self):
             self.controller: FWSAuto = None
@@ -45,7 +44,7 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
             cw, fwhm = self.controller.cw_fwhm
             self.settings.child('status', 'cw').setValue(cw)
             self.settings.child('status', 'fwhm').setValue(fwhm)
-            if self.settings['select'] == 'cw':
+            if self.settings['multiaxes', 'axis'] == 'cw':
                 pos = cw
             else:
                 pos = fwhm
@@ -90,16 +89,23 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
             """
             self.ini_stage_init(old_controller=controller,
                                 new_controller=FWSAuto())
-            self.controller.connect(self.settings['calib_path'])
+            if self.settings['multiaxes', 'multi_status'] == "Master":
+                self.controller.connect(self.settings['calib_path'])
+
             infos = self.controller.get_device_info()
             range = infos[2]
             cw_min_max = [float(r) for r in range.split('-')]
-
             self.settings.child('status', 'cw').setOpts(limits=cw_min_max)
+
+            if self.controller.is_device_enabled():
+                self.controller.get_device_status()
+                self.controller.cw_fwhm = 532., 5.
+                initialized = True
+            else:
+                initialized = False
 
             info = f'Model: {infos[0]}, Serial: {infos[1]}, Range: {infos[2]}'
             self.settings.child('info').setValue(info)
-            initialized = True
             return info, initialized
 
         def move_abs(self, value):
@@ -109,16 +115,15 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
             ----------
             value: (float) value of the absolute target positioning
             """
-
             value = self.check_bound(value)  # if user checked bounds, the defined bounds are applied here
             value = self.round_to_half_integer(value)
             self.target_value = value
             value = self.set_position_with_scaling(value)  # apply scaling if the user specified one
-            if self.settings['select'] == 'cw':
+            if self.settings['multiaxes', 'axis'] == 'cw':
                 # rounding to closest half integer
                 value = self.round_to_half_integer(value)
 
-            setattr(self.controller,self.settings['select'] , value)
+            setattr(self.controller, self.settings['multiaxes', 'axis'], value)
 
         @staticmethod
         def round_to_half_integer(value: float):

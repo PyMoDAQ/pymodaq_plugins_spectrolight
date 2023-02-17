@@ -14,18 +14,19 @@ import os
 import sys
 from pathlib import Path
 from typing import List, Union, Tuple
-from time import sleep
+from time import sleep, perf_counter
 import clr
 from System import String, Double
 
-from pymodaq.utils import daq_utils as utils
+from pymodaq.utils.logger import set_logger, get_module_name
+from pymodaq.utils import daq_utils as dutils
 from pymodaq.utils.messenger import messagebox
 from pymodaq.utils.enums import BaseEnum
 
-logger = utils.set_logger(utils.get_module_name(__file__))
+logger = set_logger(get_module_name(__file__))
 
 
-if utils.is_64bits():
+if dutils.is_64bits():
     path_dll = str(Path(r'C:\FWSPoly'))
 else:
     messagebox(severity='critical', title='FWS-Auto Dll', text='The dll is only available for 64bits systems')
@@ -48,6 +49,9 @@ class FWSAuto:
         self._fwhm: int = 5
         self._calib_path: str = None
 
+        self._timeout = 10  # s
+        self._start_time = 0.
+
     def connect(self, calibration_path: Union[str, Path]) -> str:
         self._calib_path = str(calibration_path)
         ret = self._net_wrapper.PolyConnect(String(str(calibration_path)))
@@ -60,6 +64,10 @@ class FWSAuto:
     def get_device_status(self) -> str:
         ret = self._net_wrapper.GetDeviceStatus()
         return self._net_wrapper.GetStringMsg(ret)
+
+    def is_device_ready(self) -> bool:
+        ret = self._net_wrapper.GetDeviceStatus()
+        return ret == 6
 
     def is_device_enabled(self) -> bool:
         ret = self._net_wrapper.GetDeviceEnabled()
@@ -74,6 +82,14 @@ class FWSAuto:
         if ret != 0:
             raise PolyError(self._net_wrapper.GetStringMsg(ret))
         return model, serial, range
+
+    def _wait_device_ready(self):
+        self._start_time = perf_counter()
+        while not self.is_device_ready():
+            sleep(0.5)
+            if perf_counter() - self._start_time > self._timeout:
+                logger.info('Timeout from the FWSPoly')
+                break
 
     @property
     def cw_fwhm(self) -> Tuple[float]:
@@ -94,7 +110,7 @@ class FWSAuto:
         if ret == 0:
             self._cw, self._fwhm = cw_fwhm[0], cw_fwhm[1]
         else:
-            logger.error(f'SetWavelength: {self._net_wrapper.GetStringMsg(ret)}')
+            raise IOError(f'SetWavelength: {self._net_wrapper.GetStringMsg(ret)}')
 
     def set_cw_fwhm_from_internal(self):
         self.cw_fwhm = self._cw, self._fwhm
