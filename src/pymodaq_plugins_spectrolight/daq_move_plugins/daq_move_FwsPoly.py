@@ -3,7 +3,7 @@ from pymodaq.daq_utils.parameter import Parameter
 
 from pymodaq_plugins_spectrolight.hardware.fws_auto import FWSAuto
 
-calib_file_path = r'C:\FWSPoly\20220818_FAPVIS00222.ism'
+calib_file_path = r'C:\SLI\20220818_FAPVIS00222.ism'
 
 
 class DAQ_Move_FwsPoly(DAQ_Move_base):

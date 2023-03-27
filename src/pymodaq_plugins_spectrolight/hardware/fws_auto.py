@@ -28,7 +28,7 @@ logger = set_logger(get_module_name(__file__))
 
 
 if dutils.is_64bits():
-    path_dll = str(Path(r'C:\FWSPoly'))
+    path_dll = str(Path(r'C:\SLI'))
 else:
     messagebox(severity='critical', title='FWS-Auto Dll', text='The dll is only available for 64bits systems')
 
@@ -145,7 +145,7 @@ class FWSAuto:
 
 if __name__ == '__main__':
     fws = FWSAuto()
-    msg = fws.connect(r'C:\FWSPoly\20220818_FAPVIS00222.ism')
+    msg = fws.connect(r'C:\SLI\20220818_FAPVIS00222.ism')
     print(msg)
     try:
         print(f'COM: {fws.get_com_port()}')

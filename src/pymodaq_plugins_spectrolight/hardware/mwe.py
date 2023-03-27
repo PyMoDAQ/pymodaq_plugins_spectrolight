@@ -19,7 +19,7 @@ import clr
 from System import String, Double
 
 
-path_dll = str(Path(r'C:\FWSPoly'))
+path_dll = str(Path(r'C:\SLI'))
 sys.path.append(path_dll)
 polydll = clr.AddReference('PolyDLL')
 
