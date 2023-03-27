@@ -20,9 +20,9 @@ from System import String, Double
 
 from pymodaq_plugins_spectrolight import set_logger, get_module_name
 
-from pymodaq.utils import daq_utils as dutils
-from pymodaq.utils.messenger import messagebox
-from pymodaq.utils.enums import BaseEnum
+from pymodaq.daq_utils import daq_utils as dutils
+from pymodaq.daq_utils.messenger import messagebox
+
 
 logger = set_logger(get_module_name(__file__))
 

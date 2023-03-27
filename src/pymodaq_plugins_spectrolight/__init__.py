@@ -1,5 +1,5 @@
 from pathlib import Path
-from pymodaq.utils.logger import set_logger, get_module_name
+from pymodaq.daq_utils.daq_utils import set_logger, get_module_name
 
 with open(str(Path(__file__).parent.joinpath('VERSION')), 'r') as fvers:
     __version__ = fvers.read().strip()

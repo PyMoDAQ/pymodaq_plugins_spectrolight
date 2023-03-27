@@ -1,5 +1,5 @@
 from pymodaq.control_modules.move_utility_classes import DAQ_Move_base, comon_parameters_fun, main  # common set of parameters for all actuators
-from pymodaq.utils.parameter import Parameter
+from pymodaq.daq_utils.parameter import Parameter
 
 from pymodaq_plugins_spectrolight.hardware.fws_auto import FWSAuto
 
