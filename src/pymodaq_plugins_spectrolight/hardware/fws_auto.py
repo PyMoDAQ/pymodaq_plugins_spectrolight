@@ -107,7 +107,7 @@ class FWSAuto:
 
     @cw_fwhm.setter
     def cw_fwhm(self, cw_fwhm: Tuple[float]):
-        ret = self._net_wrapper.SetWavelength(cw_fwhm[0], cw_fwhm[1])
+        ret = self._net_wrapper.SetWavelength(float(cw_fwhm[0]), float(cw_fwhm[1]))
         if ret == 0:
             self._cw, self._fwhm = cw_fwhm[0], cw_fwhm[1]
         else:
@@ -150,6 +150,7 @@ if __name__ == '__main__':
     try:
         print(f'COM: {fws.get_com_port()}')
         print(f'Infos: {fws.get_device_info()}')
+
 
         msg = fws.get_device_status()
         print(msg)
