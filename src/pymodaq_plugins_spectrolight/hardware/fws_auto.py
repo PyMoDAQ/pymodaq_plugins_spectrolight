@@ -18,7 +18,8 @@ from time import sleep, perf_counter
 import clr
 from System import String, Double
 
-from pymodaq.utils.logger import set_logger, get_module_name
+from pymodaq_plugins_spectrolight import set_logger, get_module_name
+
 from pymodaq.utils import daq_utils as dutils
 from pymodaq.utils.messenger import messagebox
 from pymodaq.utils.enums import BaseEnum

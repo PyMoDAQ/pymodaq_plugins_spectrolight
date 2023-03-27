@@ -19,8 +19,6 @@ import clr
 from System import String, Double
 
 
-
-
 path_dll = str(Path(r'C:\FWSPoly'))
 sys.path.append(path_dll)
 polydll = clr.AddReference('PolyDLL')
