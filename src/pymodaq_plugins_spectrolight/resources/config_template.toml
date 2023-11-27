@@ -1,0 +1,3 @@
+title = 'this is the configuration file of the Spectrolight plugin'
+
+calib_file_path = 'C:\SLI\20220818_FAPVIS00222.ism'

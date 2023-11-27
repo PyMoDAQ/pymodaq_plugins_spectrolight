@@ -1,9 +1,14 @@
+from pathlib import Path
+
 from pymodaq.control_modules.move_utility_classes import DAQ_Move_base, comon_parameters_fun, main  # common set of parameters for all actuators
 from pymodaq.utils.parameter import Parameter
 
 from pymodaq_plugins_spectrolight.hardware.fws_auto import FWSAuto
+from pymodaq_plugins_spectrolight.utils import Config
 
-calib_file_path = r'C:\FWSPoly\20220818_FAPVIS00222.ism'
+
+config = Config()
+calib_file_path = Path(config('calib_file_path'))
 
 
 class DAQ_Move_FwsPoly(DAQ_Move_base):
@@ -22,8 +27,8 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
         is_multiaxes = True
         _epsilon = 0.5
         axes_name = ['cw', 'fwhm']
-        params = [{'title': 'Calibration file:', 'name': 'calib_path', 'type': 'browsepath', 'value': calib_file_path,
-                   'filetype': True},
+        params = [{'title': 'Calibration file:', 'name': 'calib_path', 'type': 'browsepath',
+                   'value': str(calib_file_path), 'filetype': True},
                   {'title': 'Info:', 'name': 'info', 'type': 'str', 'value': '', 'readonly': True},
                   {'title': 'Status:', 'name': 'status', 'type': 'group', 'children': [
                       {'title': 'cw (nm):', 'name': 'cw', 'type': 'float', 'value': 0.},
@@ -53,7 +58,8 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
 
         def close(self):
             """Terminate the communication protocol"""
-            self.controller.disconnect()
+            if self.controller is not None:
+                self.controller.disconnect()
 
         def commit_settings(self, param: Parameter):
             """Apply the consequences of a change of value in the detector settings
