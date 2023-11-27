@@ -1,3 +1,4 @@
 title = 'this is the configuration file of the Spectrolight plugin'
 
-calib_file_path = 'C:\SLI\20220818_FAPVIS00222.ism'
+dll_path = 'C:\SLI'  # this is the folder where the program from SpectroLight has been installed
+calib_file_path = 'C:\SLI\20220818_FAPVIS00222.ism' # this is the file path of the configuration file of the instrument

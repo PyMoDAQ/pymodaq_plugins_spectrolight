@@ -8,7 +8,7 @@ from pymodaq_plugins_spectrolight.utils import Config
 
 
 config = Config()
-calib_file_path = Path(config('calib_file_path'))
+calib_file_path = config('calib_file_path')
 
 
 class DAQ_Move_FwsPoly(DAQ_Move_base):
@@ -26,7 +26,7 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
         _controller_units = 'nm'  # here the units is a wavelength in nm
         is_multiaxes = True
         _epsilon = 0.5
-        axes_name = ['cw', 'fwhm']
+        _axes_name = ['cw', 'fwhm']
         params = [{'title': 'Calibration file:', 'name': 'calib_path', 'type': 'browsepath',
                    'value': str(calib_file_path), 'filetype': True},
                   {'title': 'Info:', 'name': 'info', 'type': 'str', 'value': '', 'readonly': True},
@@ -34,7 +34,7 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
                       {'title': 'cw (nm):', 'name': 'cw', 'type': 'float', 'value': 0.},
                       {'title': 'fwhm (nm):', 'name': 'fwhm', 'type': 'int', 'value': 3, 'min': 3, 'max': 15},]},
                   {'title': 'Blank:', 'name': 'blank', 'type': 'led_push', 'value': False},
-                  ] + comon_parameters_fun(is_multiaxes=True, axes_names=axes_name, epsilon=_epsilon)
+                  ] + comon_parameters_fun(is_multiaxes=True, axes_names=_axes_name, epsilon=_epsilon)
 
         def ini_attributes(self):
             self.controller: FWSAuto = None

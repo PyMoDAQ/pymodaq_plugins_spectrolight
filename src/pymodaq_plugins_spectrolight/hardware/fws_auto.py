@@ -23,17 +23,12 @@ from pymodaq_plugins_spectrolight import set_logger, get_module_name
 from pymodaq.utils import daq_utils as dutils
 from pymodaq.utils.messenger import messagebox
 from pymodaq.utils.enums import BaseEnum
+from pymodaq_plugins_spectrolight.utils import Config
 
+config = Config()
 logger = set_logger(get_module_name(__file__))
 
-
-if dutils.is_64bits():
-    path_dll = str(Path(r'C:\FWSPoly'))
-else:
-    messagebox(severity='critical', title='FWS-Auto Dll', text='The dll is only available for 64bits systems')
-
-sys.path.append(path_dll)
-polydll = clr.AddReference('PolyDLL')
+polydll = clr.AddReference(str(Path(config('dll_path')).joinpath('PolyDLL.dll')))
 
 from ISM_Device import ClassPoly  # ISM_Device is the assembly name within PolyDll, found this using dotPeek
 # application over the dll. ClasPoly is the .net object to use for communication and described in the documentation
@@ -145,7 +140,7 @@ class FWSAuto:
 
 if __name__ == '__main__':
     fws = FWSAuto()
-    msg = fws.connect(r'C:\FWSPoly\20220818_FAPVIS00222.ism')
+    msg = fws.connect(config('calib_file_path'))
     print(msg)
     try:
         print(f'COM: {fws.get_com_port()}')
