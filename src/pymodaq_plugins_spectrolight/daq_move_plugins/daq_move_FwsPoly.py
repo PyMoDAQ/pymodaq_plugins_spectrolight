@@ -18,6 +18,8 @@ class DAQ_Move_FwsPoly(DAQ_Move_base):
             The particular object that allow the communication with the hardware, in general a python wrapper around the
              hardware library
         """
+
+        supported_platforms = ('win32',)  # a Windows .NET driver
         _controller_units = 'nm'  # here the units is a wavelength in nm
         is_multiaxes = True
         _epsilon = 0.5
